@@ -1,0 +1,16 @@
+# dependencies and build output
+node_modules/
+dist/
+.vite/
+
+# local-only: 3D production files, design source, older hero build, archive
+blender/
+design/
+isabella-hero/
+archive/
+
+# local settings
+.claude/settings.local.json
+.DS_Store
+*.log
+.env*

@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "isabella-hero",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5183
+    },
+    {
+      "name": "isabella-v4",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:v4"
+      ],
+      "port": 5184
+    }
+  ]
+}

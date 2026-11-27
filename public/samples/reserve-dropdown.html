@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample · reserve form with dropdowns</title>
+<style>
+@font-face{font-family:Marcellus;src:url(../assets/b9129e435557a6c357ab08e569c406c9.ttf)}
+@font-face{font-family:MC;src:url(../assets/e3fb6c6c13f851502cd04b51a8ebab0b.ttf)}
+@font-face{font-family:Poppins;font-weight:300;src:url(../assets/40ed8c24c7c1c17a5b0927272ac2d250.ttf)}
+@font-face{font-family:Poppins;font-weight:400;src:url(../assets/f23b379c87da9929bab2df8cddcd561a.ttf)}
+@font-face{font-family:Poppins;font-weight:500;src:url(../assets/e01712b3c05d996108fe2006e76b8958.ttf)}
+:root{--ease-out:cubic-bezier(.23,1,.32,1)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#1A0E0E;color:#FFFDF8}
+.mar{font-family:Marcellus,serif;font-weight:400}
+.acc{font-family:MC,serif;color:#F4B03E;font-size:1.23em}
+.k{font:400 12px/1.5 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B}
+.kd{color:#5C1A1A!important}
+.fig{font-family:Poppins,sans-serif;font-weight:300;letter-spacing:-.02em;font-variant-numeric:lining-nums tabular-nums}
+.note{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:5;font:500 10px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;border:1px dashed #C98A2B;color:#C98A2B;background:rgba(26,14,14,.85)}
+
+.wrap{max-width:1440px;margin:0 auto;padding:96px 88px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
+.head h2{margin:14px 0 0;font-size:56px;line-height:1.04;color:#FFFDF8;font-weight:400}
+.head p{margin:0;max-width:420px;font:300 16px/1.6 Poppins;color:#cdbfa6}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:24px;align-items:start}
+
+/* left: the floor plan stays exactly as it is today */
+.plan{position:relative;border:1px solid rgba(201,138,43,.35);border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#2A0F12,#1A0E0E 75%);aspect-ratio:1.25;display:flex;align-items:center;justify-content:center}
+.plan img{width:88%;filter:drop-shadow(0 20px 30px rgba(0,0,0,.5))}
+.plan .tag{position:absolute;left:24px;top:22px}
+.plan .pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;rotate:45deg;border:1.5px solid #C98A2B;background:#1A0E0E;display:flex;align-items:center;justify-content:center;transition:background 200ms ease,scale 200ms var(--ease-out)}
+.plan .pin span{rotate:-45deg;font:400 12px Marcellus,serif;color:#C98A2B}
+.plan .pin.on{background:#EDE3D0;scale:1.15}
+.plan .pin.on span{color:#5C1A1A}
+.plan .pin.off{opacity:.35}
+
+/* right: the selection panel, now with two dropdowns */
+.panel{border-radius:16px;padding:30px 34px;background:#EDE3D0;color:#1A0E0E}
+.sel-title{font-size:40px;line-height:1.1;margin:8px 0 14px;height:2.2em;display:flex;align-items:flex-end;text-wrap:balance;overflow:hidden}
+.pill{display:inline-block;font:500 10px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;border-radius:999px}
+.pill.h{background:#5C1A1A;color:#EDE3D0}
+.pill.r{background:#C98A2B;color:#1A0E0E}
+
+.field{position:relative;margin-top:22px}
+.field > label{display:block;font:400 11px/1.5 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#5C1A1A;margin-bottom:6px}
+.trigger{all:unset;box-sizing:border-box;cursor:pointer;width:100%;height:58px;display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:14px;align-items:center;padding:12px 0 14px;border-bottom:1px solid rgba(92,26,26,.45);transition:border-color 200ms ease}
+.trigger:hover{border-bottom-color:#5C1A1A}
+.trigger:focus-visible{outline:2px solid #C98A2B;outline-offset:4px;border-radius:2px}
+.trigger .v{font:400 22px/1.2 Marcellus,serif;color:#1A0E0E;display:flex;align-items:center;gap:12px;min-width:0;white-space:nowrap}
+.trigger .v .t{overflow:hidden;text-overflow:ellipsis}
+.trigger .m{font:300 15px Poppins;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#5C1A1A;text-align:right;white-space:nowrap}
+.chev{width:9px;height:9px;border-right:1.5px solid #5C1A1A;border-bottom:1.5px solid #5C1A1A;transform:translateY(-3px) rotate(45deg);transition:transform 200ms var(--ease-out)}
+.field.open .chev{transform:translateY(2px) rotate(225deg)}
+
+.list{position:absolute;left:-12px;right:-12px;top:calc(100% + 6px);z-index:10;margin:0;padding:6px;list-style:none;background:#F4ECDB;border:1px solid rgba(92,26,26,.22);border-radius:12px;box-shadow:0 14px 34px rgba(26,14,14,.22);
+  opacity:0;transform:scale(.97) translateY(-4px);transform-origin:top center;pointer-events:none;
+  transition:opacity 150ms ease,transform 150ms var(--ease-out)}
+.field.open .list{opacity:1;transform:none;pointer-events:auto;transition-duration:180ms}
+.opt{display:grid;grid-template-columns:30px 1fr auto 16px;gap:12px;align-items:center;padding:11px 12px;border-radius:8px;cursor:pointer;transition:background 120ms ease}
+.opt[aria-selected="true"] .ok{opacity:1}
+.opt:hover,.opt.active{background:rgba(92,26,26,.07)}
+.opt .d{width:22px;height:22px;rotate:45deg;border:1.5px solid #5C1A1A;display:flex;align-items:center;justify-content:center}
+.opt .d span{rotate:-45deg;font:400 10px Marcellus,serif;color:#5C1A1A}
+.opt[aria-selected="true"] .d{background:#5C1A1A}
+.opt[aria-selected="true"] .d span{color:#F4B03E}
+.opt .n{font:400 18px/1.2 Marcellus,serif}
+.opt .n small{display:block;font:300 11px Poppins;letter-spacing:.14em;text-transform:uppercase;color:#5a4034;margin-top:2px}
+.opt .p{font:300 17px Poppins;letter-spacing:-.02em;color:#5C1A1A}
+.opt .ok{opacity:0;width:6px;height:11px;border-right:1.6px solid #5C1A1A;border-bottom:1.6px solid #5C1A1A;transform:rotate(45deg) translateY(-2px);justify-self:center}
+.opt.own{grid-template-columns:1fr 16px}
+.opt.own .n{display:flex;align-items:center;gap:12px}
+
+.row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid rgba(92,26,26,.3);margin-top:22px}
+.step{display:flex;align-items:center;gap:14px;border:1px solid #5C1A1A;border-radius:999px;padding:4px 6px}
+.step button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:300 18px/1 Poppins;color:#5C1A1A;transition:transform 140ms var(--ease-out),background 150ms ease}
+.step button:hover{background:rgba(92,26,26,.08)}
+.step button:active{transform:scale(.92)}
+.step b{font:400 16px Poppins;min-width:14px;text-align:center}
+.total{padding-top:16px;border-top:1px solid rgba(92,26,26,.3)}
+.total .fig{font-size:52px;color:#5C1A1A;line-height:1.05;height:1.05em;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.total p{margin:6px 0 0;font:300 12px Poppins;color:#5a4034}
+.ann{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ann div{border-top:1px solid rgba(201,138,43,.45);padding-top:12px;font:300 13px/1.55 Poppins;color:#cdbfa6}
+.ann b{display:block;font:400 11px/1.5 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B;margin-bottom:4px}
+@media (max-width:1100px){.wrap{padding:72px 32px}.grid{grid-template-columns:1fr}.head{flex-direction:column;align-items:flex-start;gap:16px}.ann{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<span class="note">Sample for review · not live yet</span>
+<div class="wrap">
+  <div class="head">
+    <div><span class="k">Reserve a unit</span><h2 class="mar">Choose your <span class="acc">Residence</span>.</h2></div>
+    <p>Pick hotel or residence, then your suite. Tell us who you are and we will confirm on WhatsApp. Nothing is charged here.</p>
+  </div>
+
+  <div class="grid">
+    <div class="plan" aria-hidden="true">
+      <span class="k tag">Typical residential floor</span>
+      <img src="../assets/e17a3a668b9990c59d341daff1bc95f2.png" alt="">
+      <span class="pin" data-no="01" style="left:49.8%;top:14.4%"><span>01</span></span>
+      <span class="pin" data-no="02" style="left:20.5%;top:29.7%"><span>02</span></span>
+      <span class="pin" data-no="03" style="left:88.1%;top:39.1%"><span>03</span></span>
+      <span class="pin" data-no="04" style="left:23.8%;top:52.8%"><span>04</span></span>
+      <span class="pin" data-no="05" style="left:84.4%;top:61.8%"><span>05</span></span>
+    </div>
+
+    <div class="panel">
+      <div class="k kd" style="font-size:11px" id="selSize">Your selection · 50 m²</div>
+      <div class="mar sel-title" id="selTitle">1 × The Medici Classic</div>
+      <span class="pill h" id="selTag">Hotel · managed for you</span>
+
+      <div class="field" id="fOwn">
+        <label id="lOwn">Way to own</label>
+        <button class="trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lOwn vOwn">
+          <span class="v" id="vOwn"></span><span class="m" id="mOwn"></span><i class="chev"></i>
+        </button>
+        <ul class="list" role="listbox" aria-labelledby="lOwn" tabindex="-1"></ul>
+      </div>
+
+      <div class="field" id="fSuite">
+        <label id="lSuite">Suite</label>
+        <button class="trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lSuite vSuite">
+          <span class="v" id="vSuite"></span><span class="m" id="mSuite"></span><i class="chev"></i>
+        </button>
+        <ul class="list" role="listbox" aria-labelledby="lSuite" tabindex="-1"></ul>
+      </div>
+
+      <div class="row">
+        <span class="k kd" style="font-size:11px">Units</span>
+        <div class="step"><button type="button" id="dec" aria-label="One fewer">−</button><b id="n">1</b><button type="button" id="inc" aria-label="One more">+</button></div>
+      </div>
+      <div class="total">
+        <span class="k kd" style="font-size:11px">Total today</span>
+        <div class="fig" id="total">US$150,000</div>
+        <p>Hold it with US$50,000 or 30%. Prices indicative.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ann">
+    <div><b>What changes</b>The six rows become two dropdowns: Way to own (hotel or residence), then Suite. The Suite list only shows suites for the way you picked. The panel keeps the same shape whatever you choose.</div>
+    <div><b>What stays</b>Floor plan, pins, units, total, the "You are" choice and the contact fields below are unchanged. Cards and pins still preselect a suite.</div>
+    <div><b>Try it</b>Click a dropdown, or use Tab, arrow keys, Enter and Esc. Switching hotel and residence picks that group's first suite.</div>
+  </div>
+</div>
+
+<script>
+// units as the live form has them; names match the cards
+var UNITS = [
+  { no:'01', own:'hotel', name:'The Medici Classic', type:'Studio', size:50, price:150000 },
+  { no:'02', own:'hotel', name:'The Isabella', type:'One bedroom', size:100, price:290000 },
+  { no:'03', own:'hotel', name:'The Duchess', type:'Two bedrooms', size:140, price:790000 },
+  { no:'04', own:'hotel', name:'The Florence', type:'Three bedrooms', size:220, price:1200000 },
+  { no:'03', own:'res', name:'The Duchess Residence', type:'Two bedrooms', size:140, price:790000 },
+  { no:'05', own:'res', name:'The Crown of Medici', type:'Penthouse · four bedrooms', size:600, price:5000000 },
+]
+var OWN = {
+  hotel: { label:'Hotel', note:'Managed for you', pill:'h', tag:'Hotel · managed for you' },
+  res: { label:'Residence', note:'A private home to live in', pill:'r', tag:'Residence · private home' },
+}
+var state = { own:'hotel', unit:0, n:1 }
+var fmt = function (x) { return 'US$' + x.toLocaleString('en-US') }
+
+function dropdown(field, getOptions, onPick) {
+  var btn = field.querySelector('.trigger'), list = field.querySelector('.list'), active = 0
+  function render() {
+    var opts = getOptions()
+    list.innerHTML = ''
+    opts.forEach(function (o, i) {
+      var li = document.createElement('li')
+      li.className = 'opt' + (o.own ? ' own' : '')
+      li.setAttribute('role', 'option')
+      li.id = field.id + '-o' + i
+      li.setAttribute('aria-selected', String(o.selected))
+      li.innerHTML = o.html
+      li.addEventListener('click', function () { onPick(o.value); close(true) })
+      li.addEventListener('mousemove', function () { setActive(i) })
+      list.appendChild(li)
+    })
+    return opts
+  }
+  function setActive(i) {
+    var items = list.children
+    if (!items.length) return
+    active = (i + items.length) % items.length
+    Array.prototype.forEach.call(items, function (el, j) { el.classList.toggle('active', j === active) })
+    list.setAttribute('aria-activedescendant', items[active].id)
+  }
+  function open() {
+    document.querySelectorAll('.field.open').forEach(function (f) { if (f !== field) f.__close() })
+    var opts = render()
+    field.classList.add('open')
+    btn.setAttribute('aria-expanded', 'true')
+    setActive(Math.max(0, opts.findIndex(function (o) { return o.selected })))
+    list.focus({ preventScroll: true })
+  }
+  function close(refocus) {
+    field.classList.remove('open')
+    btn.setAttribute('aria-expanded', 'false')
+    if (refocus) btn.focus({ preventScroll: true })
+  }
+  field.__close = function () { close(false) }
+  btn.addEventListener('click', function () { field.classList.contains('open') ? close(true) : open() })
+  btn.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open() } })
+  list.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1) }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); list.children[active].click() }
+    else if (e.key === 'Escape' || e.key === 'Tab') { close(e.key === 'Escape') }
+  })
+  document.addEventListener('pointerdown', function (e) { if (!field.contains(e.target)) close(false) })
+}
+
+dropdown(document.getElementById('fOwn'), function () {
+  return Object.keys(OWN).map(function (k) {
+    var o = OWN[k]
+    return { value:k, own:true, selected:k === state.own,
+      html:'<span class="n"><span class="pill ' + o.pill + '">' + o.label + '</span><span style="font:300 13px Poppins;color:#5a4034">' + o.note + '</span></span><i class="ok"></i>' }
+  })
+}, function (k) {
+  if (k !== state.own) { state.own = k; state.unit = UNITS.findIndex(function (u) { return u.own === k }) }
+  update()
+})
+
+dropdown(document.getElementById('fSuite'), function () {
+  return UNITS.map(function (u, i) { return { u:u, i:i } }).filter(function (x) { return x.u.own === state.own }).map(function (x) {
+    var u = x.u
+    return { value:x.i, selected:x.i === state.unit,
+      html:'<span class="d"><span>' + u.no + '</span></span><span class="n">' + u.name + '<small>' + u.type + ' · ' + u.size + ' m²</small></span><span class="p">' + fmt(u.price) + '</span><i class="ok"></i>' }
+  })
+}, function (i) { state.unit = i; update() })
+
+document.getElementById('dec').onclick = function () { state.n = Math.max(1, state.n - 1); update() }
+document.getElementById('inc').onclick = function () { state.n = Math.min(9, state.n + 1); update() }
+
+function update() {
+  var u = UNITS[state.unit], o = OWN[state.own]
+  document.getElementById('selSize').textContent = 'Your selection · ' + u.size + ' m²'
+  document.getElementById('selTitle').textContent = state.n + ' × ' + u.name
+  var tag = document.getElementById('selTag')
+  tag.textContent = o.tag
+  tag.className = 'pill ' + o.pill
+  document.getElementById('vOwn').innerHTML = '<span class="pill ' + o.pill + '">' + o.label + '</span>'
+  document.getElementById('mOwn').textContent = o.note
+  document.getElementById('vSuite').innerHTML = '<span class="t"></span>'
+  document.querySelector('#vSuite .t').textContent = u.name
+  document.getElementById('mSuite').textContent = fmt(u.price)
+  document.getElementById('n').textContent = state.n
+  document.getElementById('total').textContent = fmt(u.price * state.n)
+  document.querySelectorAll('.plan .pin').forEach(function (p) {
+    var no = p.getAttribute('data-no')
+    var inGroup = UNITS.some(function (x) { return x.own === state.own && x.no === no })
+    p.classList.toggle('on', no === u.no)
+    p.classList.toggle('off', !inGroup)
+  })
+}
+update()
+</script>
+</body>
+</html>

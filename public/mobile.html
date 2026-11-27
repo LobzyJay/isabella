@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><title>Isabella · one-pager, mobile</title><script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="./fit.js"></script>
+<style>
+/* site build: the page scrolls, not a box inside a phone frame */
+html,body{margin:0;background:#1A0E0E}
+html,body{overflow-x:clip}
+div:has(> .ms){height:auto!important;overflow:visible!important;margin-left:var(--isa-off,auto)!important;margin-right:0!important}
+.ms{position:static!important;inset:auto!important;overflow:visible!important}
+.ov{position:fixed!important;inset:0!important}
+/* menu sheet (the export's menu page isn't in the zip) */
+.isa-menu{position:fixed;inset:0;max-width:520px;margin:0 auto;z-index:200;background:#1A0E0E;display:flex;flex-direction:column;padding:14px 24px 32px;
+  opacity:0;visibility:hidden;transform:translateY(-8px);
+  transition:opacity 200ms ease,transform 260ms cubic-bezier(.32,.72,0,1),visibility 0s linear 260ms}
+.isa-menu.open{opacity:1;visibility:visible;transform:none;transition:opacity 260ms ease,transform 400ms cubic-bezier(.32,.72,0,1),visibility 0s}
+.isa-menu-top{display:flex;justify-content:space-between;align-items:center;height:50px}
+.isa-menu-top img{width:100px}
+.isa-menu-close{width:44px;height:44px;border-radius:50%;border:1px solid rgba(201,138,43,.6);background:none;color:#F4B03E;font:300 18px/1 Poppins,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.isa-menu-close:active{transform:scale(.95)}
+.isa-menu nav{display:flex;flex-direction:column;margin-top:40px;border-top:1px solid rgba(201,138,43,.3)}
+.isa-menu nav a{font:400 30px/1.1 Marcellus,serif;color:#FFFDF8;text-decoration:none;padding:18px 0;border-bottom:1px solid rgba(201,138,43,.3);
+  opacity:0;transform:translateY(8px);transition:opacity 200ms ease,transform 260ms cubic-bezier(.23,1,.32,1)}
+.isa-menu.open nav a{opacity:1;transform:none;transition-delay:calc(var(--i) * 40ms + 80ms)}
+.isa-menu nav a:active{color:#F4B03E}
+.isa-menu-cta{margin-top:auto;min-height:52px}
+.isa-menu a:focus-visible,.isa-menu button:focus-visible{outline:2px solid #F4B03E;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.isa-menu,.isa-menu nav a{transition-duration:.01s!important;transform:none!important}}
+
+/* --- residence cards: tap the card for the suite sheet; Reserve → still goes straight to the form */
+.rc{cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.rc:active{transform:scale(.985)}
+.rc img{transition:opacity 300ms ease}
+.rc .isa-tapmore{font:500 10px/1 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B;margin-top:14px;display:block}
+/* --- suite bottom sheet */
+.isa-sheet{position:fixed;inset:0;z-index:210;pointer-events:none}
+.isa-sheet.open{pointer-events:auto}
+.isa-sheet-bg{position:absolute;inset:0;background:rgba(12,6,6,.6);opacity:0;transition:opacity 220ms ease}
+.isa-sheet.open .isa-sheet-bg{opacity:1;transition-duration:400ms}
+.isa-sheet-panel{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:520px;max-height:92%;background:#1A0E0E;border-top:1px solid rgba(201,138,43,.5);border-radius:18px 18px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform 260ms cubic-bezier(.32,.72,0,1);touch-action:pan-y}
+.isa-sheet.open .isa-sheet-panel{transform:none;transition-duration:450ms}
+.isa-sheet.dragging .isa-sheet-panel{transition:none}
+.isa-sheet-grab{flex:none;height:26px;display:flex;align-items:center;justify-content:center}
+.isa-sheet-grab i{width:40px;height:4px;border-radius:4px;background:rgba(201,138,43,.55)}
+.isa-sheet-scroll{overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+.isa-sheet-close{position:absolute;top:34px;right:14px;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid rgba(201,138,43,.6);background:rgba(26,14,14,.7);color:#F4B03E;font:300 16px/1 Poppins,sans-serif;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.isa-sheet-close:active,.isa-sheet .btn:active{transform:scale(.97)}
+.isa-sgal{position:relative;aspect-ratio:4/3;margin:0 14px;border-radius:12px;overflow:hidden;background:#2A0F12}
+.isa-sgal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:blur(3px);transition:opacity 300ms ease,filter 300ms ease}
+.isa-sgal img.on{opacity:1;filter:none}
+.isa-sgal-dots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px}
+.isa-sgal-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,253,248,.45);transition:background 200ms ease}
+.isa-sgal-dots i.on{background:#F4B03E}
+.isa-sbody{padding:18px 22px 0;display:flex;flex-direction:column;gap:14px}
+.isa-stag{align-self:flex-start;background:#5C1A1A;color:#EDE3D0;font:500 9px/1 Poppins;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:6px 10px}
+.isa-stag.res{background:#C98A2B;color:#1A0E0E}
+.isa-sbody h3{margin:0;font:400 30px/1.08 Marcellus,serif;color:#FFFDF8}
+.isa-ssub{font:300 13px/1.5 Poppins;color:#cdbfa6;margin-top:-8px}
+.isa-sk{font:400 9px/1.5 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B}
+.isa-sbody ul{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.isa-sbody li{font:300 13px/1.4 Poppins;color:#EDE3D0;display:flex;gap:9px;align-items:baseline}
+.isa-sbody li::before{content:"";flex:none;width:5px;height:5px;background:#C98A2B;transform:translateY(-2px) rotate(45deg)}
+.isa-severy{font:300 11px/1.5 Poppins;color:#bfae92;margin-top:10px}
+.isa-sfoot{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;padding-top:14px;border-top:1px solid rgba(201,138,43,.45)}
+.isa-sprice{font:400 26px/1.1 Marcellus,serif;color:#F4B03E}
+@media (prefers-reduced-motion:reduce){.isa-sheet *{transition-duration:.01s!important}}
+
+/* --- marble relief: centred with even padding, a slow, subtle tilt as it passes */
+.plate .rel{height:auto!important;aspect-ratio:1/0.86;padding:28px 24px!important;box-sizing:border-box;align-items:center!important;justify-content:center!important;perspective:900px}
+.plate .rel img{height:auto!important;max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 14px 18px rgba(60,40,20,.28));transform-origin:50% 60%;will-change:transform}
+@supports (animation-timeline: view()){
+  .plate .rel img{animation:isaMarble linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+}
+@keyframes isaMarble{from{transform:rotateX(7deg) rotateY(-5deg) scale(.97)}50%{transform:rotateX(0) rotateY(0) scale(1)}to{transform:rotateX(-4deg) rotateY(4deg) scale(.985)}}
+@media (prefers-reduced-motion:reduce){.plate .rel img{animation:none!important;transform:none!important}}
+/* --- FAQ: one list of topics, everything closed until someone is curious */
+#m-faq.isa-faq-on .pills,#m-faq.isa-faq-on .pills + div{display:none!important}
+.isa-faq{margin-top:22px;border-top:1px solid rgba(201,138,43,.35)}
+.isa-faq-cat{border-bottom:1px solid rgba(201,138,43,.35)}
+.isa-faq-cat > button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0;-webkit-tap-highlight-color:transparent}
+.isa-faq-cat > button span{flex:1;font:400 19px/1.2 Marcellus,serif;color:#FFFDF8}
+.isa-faq-cat > button small{font:400 10px/1 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#bfae92;margin-right:12px;white-space:nowrap}
+.isa-faq-cat > button i,.isa-faq-q > button i{flex:none;width:9px;height:9px;border-right:1.4px solid #C98A2B;border-bottom:1.4px solid #C98A2B;transform:translateY(-3px) rotate(45deg);transition:transform 250ms cubic-bezier(.23,1,.32,1)}
+.isa-faq-cat.open > button i,.isa-faq-q.open > button i{transform:translateY(2px) rotate(225deg)}
+.isa-faq-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows 280ms cubic-bezier(.23,1,.32,1)}
+.open > .isa-faq-body{grid-template-rows:1fr}
+.isa-faq-body > div{overflow:hidden}
+.isa-faq-q{border-top:1px solid rgba(201,138,43,.18);margin-left:2px}
+.isa-faq-q > button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 0;font:300 15px/1.45 Poppins,sans-serif;color:#EDE3D0;-webkit-tap-highlight-color:transparent}
+.isa-faq-q.open > button{color:#F4B03E}
+.isa-faq-q > button i{margin-top:6px;width:7px;height:7px}
+.isa-faq-q p{margin:0 0 16px;font:300 14px/1.6 Poppins,sans-serif;color:#cdbfa6}
+.isa-faq button:focus-visible{outline:2px solid #F4B03E;outline-offset:3px}
+.isa-faq-cat > button:active span,.isa-faq-q > button:active{opacity:.75}
+@media (prefers-reduced-motion:reduce){.isa-faq *{transition-duration:.01s!important}}
+
+
+/* Sujimoto line: Isabella sits in her card like the other towers */
+.lci:has(> .lcis){overflow:hidden!important}
+.lcis{left:0!important;bottom:auto!important;top:0!important;width:100%!important;height:100%!important;transform:none!important;object-fit:cover!important;object-position:50% 50%!important;-webkit-mask-image:none!important;mask-image:none!important}
+</style>
+<script src="./mobile.js"></script><script src="./ready.js"></script>
+<script type="module" src="/src/hero3d/mount.ts"></script>
+</head>
+<body><x-dc><helmet><style>
+@font-face{font-family:MC;src:url(./assets/e3fb6c6c13f851502cd04b51a8ebab0b.ttf)}@font-face{font-family:Marcellus;src:url(./assets/b9129e435557a6c357ab08e569c406c9.ttf)}@font-face{font-family:Poppins;font-weight:300;src:url(./assets/40ed8c24c7c1c17a5b0927272ac2d250.ttf)}@font-face{font-family:Poppins;font-weight:400;src:url(./assets/f23b379c87da9929bab2df8cddcd561a.ttf)}@font-face{font-family:Poppins;font-weight:500;src:url(./assets/e01712b3c05d996108fe2006e76b8958.ttf)}
+body{margin:0}*{box-sizing:border-box}
+a{color:#C98A2B}
+.mar{font-family:Marcellus,serif;font-weight:400}
+.acc{font-family:MC,serif;color:#F4B03E;font-size:1.23em}
+.k{font:400 11px/1.5 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B}.kd{color:#5C1A1A}
+.p{font:300 15px/1.65 Poppins,sans-serif;color:#cdbfa6;margin:0}
+.h2{margin:12px 0 0;font:400 36px/1.05 Marcellus,serif;color:#FFFDF8}
+.btn{display:flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:999px;border:1px solid #C98A2B;color:#C98A2B;background:transparent;text-decoration:none;font:500 12px/1 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.btn.g{background:#C98A2B;color:#1A0E0E}.btn.l{background:#5C1A1A;border-color:#5C1A1A;color:#EDE3D0}
+.ms{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:#1A0E0E;color:#FFFDF8;scrollbar-width:none}
+.ms::-webkit-scrollbar{display:none}
+.sec{padding:72px 24px}
+.stage{position:sticky;top:0;height:844px;overflow:hidden}
+.tl{animation-duration:1s;animation-timing-function:linear;animation-fill-mode:both;animation-range:contain 0% contain 100%}
+/* header */
+.hdr{position:sticky;top:0;z-index:30;height:64px;margin-bottom:-64px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:0 14px;background:linear-gradient(180deg,rgba(20,10,11,.75),rgba(20,10,11,0))}
+/* hero + building */
+.hb{height:4200px;view-timeline:--hb y}
+.hb .tl{animation-timeline:--hb}
+.hbg{position:absolute;inset:0;background:linear-gradient(180deg,#151a33 0%,#1b2850 40%,#1d2d5c 100%);animation-name:hbg}
+.htop{z-index:2;position:absolute;left:0;right:0;top:0;height:330px;background:linear-gradient(180deg,rgba(21,26,51,.7),rgba(21,26,51,0));animation-name:hbg}
+.hbr{position:absolute;left:-420px;bottom:-6px;width:1240px;opacity:.55;filter:saturate(.9);-webkit-mask-image:linear-gradient(180deg,transparent,#000 40%);mask-image:linear-gradient(180deg,transparent,#000 40%);animation-name:hbr}
+.hbrown{position:absolute;inset:0;background:radial-gradient(ellipse 90% 70% at 60% 55%,#2A0F12,#1A0E0E 78%);animation-name:hbrn}
+.htx{z-index:3;position:absolute;left:24px;right:24px;top:92px;display:flex;flex-direction:column;gap:14px;animation-name:htx}
+.tw{position:absolute;left:100px;top:70px;width:310px;height:790px;transform-origin:0 0;animation-name:tw}
+.tw .twb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%}
+.twr{-webkit-mask-image:linear-gradient(180deg,#000 0 40%,transparent 43.5% 50%,#000 50% 100%);mask-image:linear-gradient(180deg,#000 0 40%,transparent 43.5% 50%,#000 50% 100%);-webkit-mask-size:100% 300%;mask-size:100% 300%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation-name:twm}
+.twl{position:absolute;inset:0;opacity:.9;-webkit-mask-image:linear-gradient(180deg,transparent 0 40%,#000 43.5% 50%,transparent 50% 100%);mask-image:linear-gradient(180deg,transparent 0 40%,#000 43.5% 50%,transparent 50% 100%);-webkit-mask-size:100% 300%;mask-size:100% 300%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation-name:twm}
+.twb{position:absolute;inset:0;-webkit-mask-image:linear-gradient(180deg,#000 86%,rgba(0,0,0,.6) 93%,transparent 100%);mask-image:linear-gradient(180deg,#000 86%,rgba(0,0,0,.6) 93%,transparent 100%)}
+.hrw{position:absolute;left:-789.4px;top:-224.6px;width:1856.3px;height:1044.2px;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 12%,#000 88%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 12%,#000 88%,transparent 100%);animation-name:hrw}
+.hrx{position:absolute;left:0;right:0;bottom:100%;height:900px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.1) 12%,rgba(0,0,0,.4) 24%,rgba(0,0,0,.78) 36%,#000 50%);mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.1) 12%,rgba(0,0,0,.4) 24%,rgba(0,0,0,.78) 36%,#000 50%)}
+.hri{position:absolute!important;inset:0;width:100%!important;height:100%!important;object-fit:fill!important;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.1) 12%,rgba(0,0,0,.4) 24%,rgba(0,0,0,.78) 36%,#000 50%);mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.1) 12%,rgba(0,0,0,.4) 24%,rgba(0,0,0,.78) 36%,#000 50%)}
+@keyframes hrw{0%,3%{opacity:1}10%,100%{opacity:0}}
+@keyframes twf{0%,8%{opacity:0}14%,100%{opacity:1}}
+.twf{animation-name:twf;position:absolute;left:6%;right:6%;bottom:-1%;height:6%;background:linear-gradient(180deg,rgba(26,14,14,0),rgba(26,14,14,.6) 55%,rgba(26,14,14,.92));-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)}
+.scan{position:absolute;left:143px;width:223px;top:70px;height:1px;background:linear-gradient(90deg,rgba(244,176,62,0),#F4B03E 18%,#FFE2A8 50%,#F4B03E 82%,rgba(244,176,62,0));box-shadow:0 0 14px 2px rgba(244,176,62,.45);animation-name:scan}
+.mride{position:absolute;left:0;top:70px;width:390px;height:0;animation-name:scanT}
+.mlead{position:absolute;left:12px;width:131px;top:0;height:1px;background:linear-gradient(90deg,rgba(201,138,43,.5),#F4B03E);animation:mlead 1s linear both;animation-timeline:--hb;animation-range:contain 0% contain 100%}
+@keyframes mlead{0%,13%{opacity:0}15%,78%{opacity:1}81%,100%{opacity:0}}
+.mcard{position:absolute;left:12px;top:0;width:131px;padding:9px 10px 10px 10px;background:linear-gradient(90deg,rgba(26,14,14,.94) 72%,rgba(26,14,14,0));animation-duration:1s;animation-timing-function:linear;animation-fill-mode:both;animation-range:contain 0% contain 100%;animation-timeline:--hb}
+@keyframes scanT{0%,14%{transform:translateY(0)}78%,100%{transform:translateY(790px)}}
+.btx{position:absolute;left:24px;right:24px;top:84px;animation-name:btx}
+.bst{position:absolute;left:24px;top:420px;width:168px;display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;animation-name:bst}
+.st{padding-top:10px;border-top:1px solid rgba(201,138,43,.45)}.st b{display:block;font:400 28px/1 Marcellus,serif;color:#F4B03E}.st span{display:block;margin-top:7px;font:400 8.5px/1.2 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#cdbfa6}
+.hint{position:absolute;left:0;right:0;bottom:22px;text-align:center;animation-name:hint}
+@keyframes hbr{0%,4%{opacity:.55}14%,100%{opacity:0}}
+@keyframes hbg{0%,6%{opacity:1}16%,100%{opacity:0}}
+@keyframes hbrn{0%,6%{opacity:0}16%,100%{opacity:1}}
+@keyframes htx{0%{opacity:1;transform:none}5%,100%{opacity:0;transform:translateY(-24px)}}
+@keyframes hint{0%,2%{opacity:1}5%,100%{opacity:0}}
+@keyframes tw{0%,3%{transform:translate(0.6px,290.6px) scale(.6068);animation-timing-function:cubic-bezier(.6,0,.2,1)}12%,82%{transform:none;animation-timing-function:cubic-bezier(.6,0,.2,1)}93%,100%{transform:translate(96px,320px) scale(.6076)}}
+@keyframes twm{0%,13%{-webkit-mask-position:0 75%;mask-position:0 75%}78%{-webkit-mask-position:0 25%;mask-position:0 25%}84%,100%{-webkit-mask-position:0 10%;mask-position:0 10%}}
+@keyframes scan{0%,13%{opacity:0;transform:translateY(0)}14%{opacity:1;transform:translateY(0)}78%{opacity:1;transform:translateY(790px)}82%,100%{opacity:0;transform:translateY(790px)}}
+@keyframes btx{0%,86%{opacity:0;transform:translateY(20px)}93%,100%{opacity:1;transform:none}}
+@keyframes bst{0%,89%{opacity:0;transform:translateY(20px)}96%,100%{opacity:1;transform:none}}
+@keyframes mc0{0%,18.56%{opacity:0;transform:translateX(-8px)}20.56%,28.44%{opacity:1;transform:none}30.04%,100%{opacity:0;transform:none}}
+@keyframes mc1{0%,29.44%{opacity:0;transform:translateX(-8px)}31.44%,39.96%{opacity:1;transform:none}41.56%,100%{opacity:0;transform:none}}
+@keyframes mc2{0%,40.96%{opacity:0;transform:translateX(-8px)}42.96%,50.84%{opacity:1;transform:none}52.44%,100%{opacity:0;transform:none}}
+@keyframes mc3{0%,51.84%{opacity:0;transform:translateX(-8px)}53.84%,61.72%{opacity:1;transform:none}63.32%,100%{opacity:0;transform:none}}
+@keyframes mc4{0%,62.72%{opacity:0;transform:translateX(-8px)}64.72%,72.60%{opacity:1;transform:none}74.20%,100%{opacity:0;transform:none}}
+@keyframes mc5{0%,73.60%{opacity:0;transform:translateX(-8px)}75.60%,79.00%{opacity:1;transform:none}82.00%,100%{opacity:0;transform:none}}
+/* story plate */
+.plate{margin:0 12px;background:#EDE3D0;border-radius:16px;color:#1A0E0E;overflow:hidden;position:relative;z-index:3}
+.rel{height:300px;background:#e4d8c1;display:flex;justify-content:center}.rel img{height:100%}
+.more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s ease}.more.on{grid-template-rows:1fr}.more>div{overflow:hidden}
+.seals{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:22px}
+/* handover */
+.ho{height:3400px;view-timeline:--ho y;margin-top:-140px}
+.ho .tl{animation-timeline:--ho}
+.hcomp{position:absolute;left:0;top:0;width:390px;height:844px;transform-origin:0 0;animation-name:hcomp}
+.hph{position:absolute;left:-92px;top:-47px;width:560px;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 7%,#000 62%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 7%,#000 62%,transparent 80%);animation-name:hph}
+.hsl{position:absolute;left:164.5px;top:269.5px;width:61px;height:61px;transform:rotate(25deg);animation-name:hsl}
+.hall{position:absolute;inset:0;animation-name:hall}
+.hfade{position:absolute;left:0;right:0;top:380px;height:900px;background:linear-gradient(180deg,rgba(26,14,14,0),#1A0E0E 22%);animation-name:hfd}
+.hbento{position:absolute;left:16px;right:16px;top:430px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{padding:16px;border:1px solid rgba(201,138,43,.32);background:rgba(36,20,20,.8);border-radius:8px;animation-name:t1}
+.big{font:400 42px/1 Marcellus,serif;color:#F4B03E;margin-top:10px}.sm{font:300 12px/1.5 Poppins;color:#d8cbb4;margin-top:6px}
+.ham{display:grid;grid-template-columns:1fr 1fr;gap:12px 8px;margin-top:12px}.ham div{display:flex;align-items:center;gap:8px}.ham i{flex:none;width:32px;height:32px;border-radius:9px;background:rgba(201,138,43,.14);display:flex;align-items:center;justify-content:center}.ham i img{width:16px;height:16px;object-fit:contain}.ham b{display:block;font:400 13px/1.15 Marcellus,serif;color:#FFFDF8}.ham em{display:block;font:400 8px/1.4 Poppins;font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:#bfae92}
+@keyframes hsl{0%,4%{transform:rotate(25deg) translate(0,-520px)}18%,100%{transform:rotate(25deg) translate(0,0);animation-timing-function:cubic-bezier(.22,.7,.2,1)}}
+@keyframes hcomp{0%,18%{transform:translate(195px,422px) rotate(-25deg) scale(1.78) translate(-195px,-300px);animation-timing-function:cubic-bezier(.45,0,.2,1)}42%,100%{transform:none}}
+@keyframes hph{0%,17%{opacity:0}32%,100%{opacity:1}}
+@keyframes hfd{0%,40%{opacity:0}50%,100%{opacity:1}}
+@keyframes hall{0%,52%{transform:none}96%,100%{transform:translateY(-330px)}}
+@keyframes t1{0%,45%{opacity:0;transform:translateY(28px)}53%,100%{opacity:1;transform:none}}@keyframes t2{0%,50%{opacity:0;transform:translateY(28px)}58%,100%{opacity:1;transform:none}}@keyframes t3{0%,55%{opacity:0;transform:translateY(28px)}63%,100%{opacity:1;transform:none}}@keyframes t4{0%,60%{opacity:0;transform:translateY(28px)}68%,100%{opacity:1;transform:none}}@keyframes t5{0%,65%{opacity:0;transform:translateY(28px)}73%,100%{opacity:1;transform:none}}@keyframes t6{0%,70%{opacity:0;transform:translateY(28px)}78%,100%{opacity:1;transform:none}}@keyframes t7{0%,75%{opacity:0;transform:translateY(28px)}83%,100%{opacity:1;transform:none}}
+/* amenities */
+.abt{all:unset;cursor:pointer;position:relative;display:block;border-radius:14px;overflow:hidden}.abt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}.abt:active img{transform:scale(1.04)}.abt .g{position:absolute;inset:0;background:linear-gradient(0deg,rgba(26,14,14,.92),rgba(26,14,14,0) 55%)}.abt .t{position:absolute;left:16px;right:16px;bottom:14px;display:flex;flex-direction:column;gap:4px}
+.ov{position:absolute;inset:0;z-index:60;background:#1A0E0E;overflow-y:auto;scrollbar-width:none}.ov::-webkit-scrollbar{display:none}
+.ovs{position:sticky;top:0;height:844px;overflow:hidden;}
+.ovs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+.ovg{position:absolute;inset:0;background:linear-gradient(0deg,rgba(26,14,14,.95) 8%,rgba(26,14,14,0) 55%)}
+.ovt{position:absolute;left:24px;right:24px;bottom:72px;display:flex;flex-direction:column;gap:12px}
+.ovn{position:absolute;left:24px;bottom:34px;font:400 11px Poppins;letter-spacing:.2em;color:#C98A2B}
+.al{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid rgba(201,138,43,.25);font:300 14px/1.35 Poppins;color:#EDE3D0}.al i{flex:none;width:36px;height:36px;border-radius:10px;background:rgba(201,138,43,.14);display:flex;align-items:center;justify-content:center}
+.ovx{position:sticky;top:14px;z-index:5;margin:14px 14px -58px auto;width:44px;height:44px;border-radius:50%;border:1px solid rgba(201,138,43,.6);background:rgba(26,14,14,.7);display:flex;align-items:center;justify-content:center;cursor:pointer}
+/* residences */
+.tabs{display:flex;padding:4px;border:1px solid rgba(201,138,43,.4);border-radius:999px;margin-top:22px}.tabs button{all:unset;cursor:pointer;flex:1;text-align:center;padding:12px 0;border-radius:999px;font:500 11px/1 Poppins;letter-spacing:.14em;text-transform:uppercase}
+.row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:22px -24px 0 0;padding:0 24px 6px 0;scrollbar-width:none}.row::-webkit-scrollbar{display:none}.row>*{scroll-snap-align:start;flex:none}
+.rc{width:286px;border:1px solid rgba(201,138,43,.32);border-radius:14px;overflow:hidden;background:#241414}
+/* location */
+.map{margin:22px -24px 0;overflow-x:auto;scrollbar-width:none}.map::-webkit-scrollbar{display:none}.map img{display:block;height:340px}
+/* house */
+.hs{height:2400px;view-timeline:--hs y}.hs .tl{animation-timeline:--hs}
+.coin{position:relative;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle at 32% 26%,#fff7de 0%,#f3dfae 16%,#dcbb7c 40%,#b8914f 66%,#80622f 90%,#5e4720 100%);box-shadow:inset 0 3px 8px rgba(255,255,255,.7),inset 0 -22px 46px rgba(70,45,12,.5),inset 0 0 0 12px rgba(130,98,44,.28)}
+.coin-dot{position:absolute;inset:16px;border-radius:50%;border:2px dotted rgba(92,66,26,.55)}
+.coin-ring{position:absolute;inset:86px;border-radius:50%;border:1.5px solid rgba(92,66,26,.45);box-shadow:0 1px 0 rgba(255,240,205,.55),inset 0 1px 0 rgba(255,240,205,.4)}
+.coin-emb{position:absolute;inset:112px;filter:drop-shadow(0 1.2px 0 rgba(255,242,210,.7)) drop-shadow(0 -1px 0 rgba(70,45,12,.35))}
+.coin-logo{width:100%;height:100%;background:linear-gradient(165deg,#4d361a,#24170a);-webkit-mask:url(./assets/563a3b7da3325370d8383f721ef74a21.webp) center/contain no-repeat;mask:url(./assets/563a3b7da3325370d8383f721ef74a21.webp) center/contain no-repeat}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hsb{position:absolute;left:50%;top:50%;width:440px;height:440px;margin:-220px 0 0 -220px;animation-name:hsb}
+.hsi{position:absolute;inset:0;background:#EDE3D0;color:#1A0E0E;clip-path:circle(0% at 50% 50%);display:flex;flex-direction:column;justify-content:flex-end;padding:0 24px 64px;animation-name:hsi}
+.hsin{animation-name:hsn}
+@keyframes hsb{0%,30%{transform:scale(.62);opacity:1}55%,100%{transform:scale(1);opacity:0}}
+@keyframes hsi{0%,32%{clip-path:circle(0% at 50% 50%);animation-timing-function:cubic-bezier(.7,0,.2,1)}60%,100%{clip-path:circle(85% at 50% 50%)}}
+@keyframes hsn{0%,52%{opacity:0;transform:translateY(30px)}70%,100%{opacity:1;transform:none}}
+.ln{height:2600px;view-timeline:--ln y;background:#EDE3D0}.ln .tl{animation-timeline:--ln}
+.lstage{position:sticky;top:0;height:844px;overflow:hidden;background:#EDE3D0;color:#1A0E0E;padding:96px 0 0}
+.ltrack{display:flex;gap:16px;padding:0 24px;margin-top:28px;width:max-content;animation-name:ltr}
+@keyframes ltr{0%,8%{transform:none}92%,100%{transform:translateX(-988px)}}
+.lc{width:250px;flex:none}.lci{position:relative;height:330px;border-radius:14px;overflow:hidden}.lci img{width:100%;height:100%;object-fit:cover}
+.lcis{position:absolute!important;left:50%;bottom:0;width:auto!important;height:390px!important;transform:translateX(-50%);object-fit:contain!important;-webkit-mask-image:linear-gradient(180deg,#000 90%,transparent 100%);mask-image:linear-gradient(180deg,#000 90%,transparent 100%)}
+.lcm{display:flex;align-items:center;gap:8px;margin-top:14px}.dia{width:8px;height:8px;background:#C98A2B;transform:rotate(45deg)}
+.lbar{position:absolute;left:24px;right:24px;bottom:40px;height:1px;background:rgba(92,26,26,.2)}.lbar i{display:block;height:1px;background:#5C1A1A;transform-origin:0 0;animation-name:lbar}@keyframes lbar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* letter */
+.letter{margin:0 12px;padding:56px 26px 48px;background:radial-gradient(ellipse at 30% 22%,#f4e8c9 0%,#ead9b4 55%,#d9c08f 100%);box-shadow:inset 0 0 50px 8px rgba(110,60,15,.45),inset 0 0 6px 2px rgba(90,45,10,.55);color:#3b2414;border-radius:3px}
+/* reserve */
+.pins{position:relative}.pin{all:unset;cursor:pointer;position:absolute;transform:translate(-50%,-50%);min-width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:500 11px/1 Poppins;border:1px solid #C98A2B}
+.fld{display:flex;flex-direction:column;gap:8px;font:400 10px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#C98A2B}.fld input{background:transparent;border:0;border-bottom:1px solid rgba(201,138,43,.6);color:#FFFDF8;font:300 16px Poppins;padding:8px 0 10px;outline:0}
+/* faq */
+.pills{display:flex;gap:8px;overflow-x:auto;margin:22px -24px 0 0;padding-right:24px;scrollbar-width:none}.pills::-webkit-scrollbar{display:none}.pills button{all:unset;cursor:pointer;flex:none;padding:11px 16px;border-radius:999px;border:1px solid rgba(201,138,43,.45);font:500 10px/1 Poppins;letter-spacing:.14em;text-transform:uppercase}
+.fq{border-bottom:1px solid rgba(201,138,43,.3)}.fq button{all:unset;cursor:pointer;display:flex;width:100%;justify-content:space-between;gap:16px;padding:16px 0;font:400 16px/1.35 Marcellus,serif;color:#FFFDF8}.fq i{font-style:normal;color:#C98A2B;font-size:20px;line-height:1;transition:transform .3s}
+@media (prefers-reduced-motion:reduce){.tl,.mcard,.mln *,.mdia{animation:none!important}}
+
+</style></helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#1A0E0E">
+<div class="ms">
+<div class="hdr"><a href="T-Menu-Mobile.dc.html" aria-label="Open menu" style="width:44px;height:44px;display:flex;align-items:center"><svg width="24" height="14" viewBox="0 0 24 14" aria-hidden="true"><path d="M0 1h24M0 13h16" stroke="#C98A2B" stroke-width="1.3"></path></svg></a><a href="#" style="justify-self:center;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none"><img src="./assets/936e38004cfd8fff7623561dfdab74ed.png" alt="Isabella" style="width:100px"><span style="font:400 7.5px/1 Poppins;letter-spacing:.32em;color:#C98A2B">BY SUJIMOTO</span></a><a href="#m-reserve" aria-label="Reserve a unit" style="width:44px;height:44px;display:flex;align-items:center;justify-content:flex-end"><span style="width:9px;height:9px;background:#C98A2B;transform:rotate(45deg)"></span></a></div>
+
+<div class="hb"><div class="stage">
+ <div class="hbrown tl"></div><div class="hbg tl"></div>
+ <div class="htop tl"></div>
+ <div class="htx tl"><h1 class="mar" style="margin:0;font-size:38px;line-height:1.05;color:#FFFDF8">Own a suite in Africa’s <span class="acc">Tallest</span> hotel residence.</h1><p class="p" style="color:#e6d8c0;font-size:14px">Fifty Pioneer suites in Victoria Island, managed for you and held in your name.</p><a class="btn g" href="#m-reserve" style="align-self:flex-start;min-height:44px;margin-top:4px">Reserve a Unit</a></div>
+ <div class="tw tl"><div class="hrw tl"><img src="./assets/011ef5cbfb41f0246d673125863485ee.jpg" alt="" class="hri"></div><div class="twb"><div class="twl tl"><img src="./assets/69b048cf8aa4f3e4165ae9466126c943.png" alt="" style="transform-origin:50% 100%;transform:translateX(3px) scale(1.136)"></div><img class="twr tl" src="./assets/071a923d6fdc9229a9386bbec89d4317.webp" alt="Isabella tower"></div><div class="twf tl"></div></div>
+ <div class="scan tl"></div>
+ <div class="mride tl"><span class="mlead"></span><div class="mcard" style="animation-name:mc0"><span class="k" style="font-size:9px">Rooftop</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Sky pool and sky bar</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">Above the Lagos skyline</div></div><div class="mcard" style="animation-name:mc1"><span class="k" style="font-size:9px">In the sky</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Wellness and spa</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">Spa, beauty and recovery</div></div><div class="mcard" style="animation-name:mc2"><span class="k" style="font-size:9px">Upper floors</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Pioneer suites</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">The fifty founding suites</div></div><div class="mcard" style="animation-name:mc3"><span class="k" style="font-size:9px">Hotel</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Hotel suites</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">Studio to three bedrooms</div></div><div class="mcard" style="animation-name:mc4"><span class="k" style="font-size:9px">Floor 7</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Aquarium, boutiques, dining</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">Three international restaurants</div></div><div class="mcard" style="animation-name:mc5"><span class="k" style="font-size:9px">Ground floor</span><div class="mar" style="font-size:16px;line-height:1.15;margin-top:4px;color:#FFFDF8">Arrival lobby</div><div style="font:300 11px/1.4 Poppins;color:#cdbfa6;margin-top:3px">Where Isabella welcomes you</div></div></div>
+ <div class="btx tl"><span class="k">The building</span><h2 class="h2" style="font-size:32px">Fifty-five storeys. One <span class="acc">Address</span>.</h2><p class="p" style="margin-top:12px;font-size:14px">A hotel, managed suites and private residences in one tower over the Victoria Island waterfront.</p></div>
+ <div class="bst tl"><div class="st"><b>55</b><span>Storeys</span></div><div class="st"><b>1</b><span>Developer</span></div><div class="st"><b>2030</b><span>Completion</span></div><div class="st"><b>Few</b><span>Units available</span></div></div>
+ <div class="hint tl"><span class="k" style="font-size:10px">Scroll</span></div>
+</div></div>
+
+<div class="plate">
+ <div class="rel"><img src="./assets/9c619932a15b6342d59cc3d19141b4f3.png" alt="Marble relief of Isabella"></div>
+ <div style="padding:32px 24px 40px">
+  <div style="display:flex;align-items:baseline;gap:14px"><span class="mar" style="font-size:16px;color:#5C1A1A">1542</span><div style="flex:1;height:1px;background:#5C1A1A"></div><span class="mar" style="font-size:16px;color:#5C1A1A">2030</span></div>
+  <h2 class="mar" style="margin:20px 0 0;font-size:40px;line-height:1">From Florence<br>to <span class="acc" style="color:#5C1A1A">Lagos</span>.</h2>
+  <p style="margin:16px 0 0;font:300 15px/1.65 Poppins;color:#3d2a22">The Medici built empires that lasted five hundred years. Isabella is built for the next five hundred.</p>
+  <div class="more {{storyCls}}"><div><p style="margin:14px 0 0;font:300 15px/1.65 Poppins;color:#3d2a22">Isabella de’ Medici was a Florentine noblewoman of the Renaissance, known for her wit, her music and her patronage of the arts. History came close to forgetting her. We gave this tower her name so that Lagos remembers her every day.</p></div></div>
+  <button type="button" onClick="{{toggleStory}}" style="all:unset;cursor:pointer;margin-top:16px;color:#5C1A1A;font:500 11px Poppins;letter-spacing:.16em;text-transform:uppercase">{{storyLbl}}</button>
+  <div style="height:1px;background:rgba(92,26,26,.25);margin:40px 0"></div>
+  <span class="k kd">The Pioneer suites</span>
+  <h2 class="mar" style="margin:12px 0 0;font-size:40px;line-height:1">Fifty seals.<br>Fifty <span class="acc" style="color:#5C1A1A">Names</span>.</h2>
+  <p style="margin:14px 0 0;font:300 15px/1.65 Poppins;color:#3d2a22">Each Pioneer suite carries its owner’s name in Isabella’s founding collection. Once the fifty are sealed, pre-launch terms close.</p>
+  <div class="seals"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:0.22"><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:100%;opacity:1"></div>
+  <div style="display:flex;gap:16px;align-items:center;margin-top:24px"><a class="btn l" href="#m-reserve" style="min-height:46px">Reserve a Unit</a><span class="k kd" style="font-size:10px">Few places left</span></div>
+ </div>
+</div>
+
+<div class="ho"><div class="stage">
+ <div class="hall tl">
+  <div class="hcomp tl"><img class="hph tl" src="./assets/0b33a6d7edcc7df8851f782d839d2179.webp" alt="One hand passing a sealed card to another"><img class="hsl tl" src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="Isabella seal"></div>
+  <div class="hfade tl"></div>
+  <div class="hbento">
+   <div class="tile tl" style="grid-column:span 2;animation-name:t1"><span class="k" style="font-size:10px">Hotel · Residences · Victoria Island</span><h2 class="mar" style="margin:10px 0 0;font-size:28px;line-height:1.06;color:#FFFDF8">Ready to rewrite history <span class="acc">again?</span></h2></div>
+   <div class="tile tl" style="animation-name:t2"><span class="k" style="font-size:10px">Rental income</span><div class="big">25<span style="font-size:.5em;vertical-align:top">%</span></div><div class="sm">Target annual rental return</div></div>
+   <div class="tile tl" style="animation-name:t3"><span class="k" style="font-size:10px">Return</span><div class="big">300<span style="font-size:.5em;vertical-align:top">%</span></div><div class="sm">ROI on equity upon completion</div></div>
+   <div class="tile tl" style="grid-column:span 2;animation-name:t4"><span class="k" style="font-size:10px">Pioneer suites</span><div style="display:flex;align-items:center;gap:14px"><div class="big">50</div><div class="sm" style="margin-top:10px">Across hotel and residences, managed for you and held in your name</div></div></div>
+   <div class="tile tl" style="grid-column:span 2;animation-name:t5"><span class="k" style="font-size:10px">Within</span><div class="ham"><div><i><img src="./assets/20814b7ca88ef4061923ec9ac74a7ccd.png" alt=""></i><span><b>Lobby aquarium</b><em>Floor 7</em></span></div><div><i><img src="./assets/1dd901084f1a93daa48f1ee5f1978168.png" alt=""></i><span><b>Sky pool</b><em>&amp; lounge</em></span></div><div><i><img src="./assets/503dd418296794f8484084af3958a417.png" alt=""></i><span><b>Boutiques</b><em>&amp; minimart</em></span></div><div><i><img src="./assets/b337dec119809abb8ad59e435addbb43.png" alt=""></i><span><b>Casino</b><em>&amp; billiards</em></span></div></div></div>
+   <div class="tile tl" style="grid-column:span 2;display:flex;align-items:center;justify-content:space-between;gap:12px;animation-name:t6"><div><span class="k" style="font-size:10px">Entry</span><div class="mar" style="font-size:22px;color:#FFFDF8;margin-top:4px">From US$150,000</div></div><a class="btn g" href="#m-reserve" style="min-height:42px;padding:0 16px;font-size:10px">Reserve</a></div>
+   <div class="tl" style="grid-column:span 2;font:300 10px/1.5 Poppins;color:#a8987e;animation-name:t7">Investment projections are targets, not guarantees, and remain subject to approved terms.</div>
+  </div>
+ </div>
+</div></div>
+
+<section class="sec" id="m-amenities" style="padding-top:24px"><span class="k">Amenities</span><h2 class="h2">Every room has a <span class="acc">Story</span>.</h2>
+ <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:300px 190px;gap:10px;margin-top:24px">
+  <button type="button" class="abt" onClick="{{openAm}}" style="grid-column:span 2"><img src="./assets/3db1a3e8aefe41bd20a2a5494bc6675f.jpg" alt=""><span class="g"></span><span class="t"><span class="k" style="font-size:10px">Floor 7 · Hotel lobby</span><span class="mar" style="font-size:26px;color:#FFFDF8">The lobby aquarium</span></span></button>
+  <button type="button" class="abt" onClick="{{openAm}}"><img src="./assets/52d77b4da5917bf40f0b216c8fc0682b.jpg" alt=""><span class="g"></span><span class="t"><span class="k" style="font-size:9px">Rooftop</span><span class="mar" style="font-size:18px;color:#FFFDF8">The sky pool</span></span></button>
+  <button type="button" class="abt" onClick="{{openAm}}"><img src="./assets/dc0d0aa874585783298b00d688d0ebc9.jpg" alt=""><span class="g"></span><span class="t"><span class="k" style="font-size:9px">Wellness</span><span class="mar" style="font-size:18px;color:#FFFDF8">Spa in the sky</span></span></button>
+ </div>
+ <button type="button" class="btn g" onClick="{{openAm}}" style="width:100%;margin-top:18px">View all amenities →</button>
+</section>
+
+<section class="sec" id="m-residences" style="padding-top:24px"><span class="k">The collection</span><h2 class="h2">Six <span class="acc">Residences</span>, two ways to own.</h2>
+ <div class="tabs"><button type="button" onClick="{{tabH}}" style="background:{{tH.bg}};color:{{tH.ink}}">Hotel · 4</button><button type="button" onClick="{{tabR}}" style="background:{{tR.bg}};color:{{tR.ink}}">Residence · 2</button></div>
+ <p class="p" style="margin-top:16px;font-size:14px">{{tabLine}}</p>
+ <div class="row"><sc-for list="{{rlist}}" as="r" hint-placeholder-count="4"><div class="rc"><div style="position:relative;height:190px;border-bottom:1px solid #C98A2B;overflow:hidden"><img src="{{r.img}}" alt="{{r.name}}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:12px;top:12px;padding:5px 9px;border-radius:999px;background:{{r.tbg}};color:{{r.tink}};font:500 9px/1 Poppins;letter-spacing:.12em;text-transform:uppercase">{{r.kind}}</span></div><div style="padding:18px"><div style="display:flex;justify-content:space-between"><span class="mar" style="font-size:14px;color:#C98A2B">{{r.no}}</span><span class="k" style="font-size:9px">{{r.kind}}</span></div><div class="mar" style="font-size:24px;margin-top:6px">{{r.name}}</div><div style="font:300 12px/1.5 Poppins;color:#cdbfa6;margin-top:4px">{{r.sub}}</div><div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:18px"><div><div class="k" style="font-size:9px;color:#bfae92">From</div><div class="mar" style="font-size:22px;color:#F4B03E">{{r.price}}</div></div><a class="btn" href="#m-reserve" onClick="{{r.pick}}" style="min-height:38px;padding:0 16px;font-size:10px">Reserve →</a></div></div></div></sc-for></div>
+</section>
+
+<section class="sec" id="m-location" style="padding-top:24px"><span class="k">Location</span><h2 class="h2">Where she <span class="acc">Stands</span>.</h2><p class="p" style="margin-top:14px;font-size:14px">Victoria Island, Lagos. The commercial centre of the city, with views of the Atlantic, Ikoyi and the Lagos skyline.</p>
+ <div style="margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-top:1px solid rgba(201,138,43,.35);font:300 15px Poppins;color:#EDE3D0"><span>Ikoyi</span><span class="mar" style="color:#C98A2B;font-size:24px">7<span style="font-size:12px"> min</span></span></div><div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-top:1px solid rgba(201,138,43,.35);font:300 15px Poppins;color:#EDE3D0"><span>Eko Atlantic City</span><span class="mar" style="color:#C98A2B;font-size:24px">5<span style="font-size:12px"> min</span></span></div><div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-top:1px solid rgba(201,138,43,.35);font:300 15px Poppins;color:#EDE3D0"><span>The airport</span><span class="mar" style="color:#C98A2B;font-size:24px">10<span style="font-size:12px"> min</span></span></div></div>
+ <div class="map"><img src="./assets/1905e727a215e7e0d93e7da26adb0c81.png" alt="Antique scroll map of Victoria Island"></div><div class="k" style="font-size:9px;color:#bfae92;margin-top:10px">Drag the map ←→</div>
+</section>
+
+<div class="hs"><div class="stage" style="background:#1A0E0E">
+ <div class="hsb tl"><div class="coin" role="img" aria-label="Isabella de’ Medici by Sujimoto seal"><div class="coin-dot"></div><svg viewBox="0 0 440 440" width="440" height="440" style="position:absolute;inset:0;animation:spin 40s linear infinite" aria-hidden="true"><defs><path id="mcin" d="M220,220 m-164,0 a164,164 0 1,1 328,0 a164,164 0 1,1 -328,0"></path></defs><text dy="1.2" style="font:500 16px Poppins,sans-serif;fill:rgba(255,243,212,.7)"><textPath href="#mcin" textLength="1020" lengthAdjust="spacing">BY SUJIMOTO · ISABELLA DE’ MEDICI · BY SUJIMOTO · ISABELLA DE’ MEDICI · </textPath></text><text style="font:500 16px Poppins,sans-serif;fill:#6a4c1f"><textPath href="#mcin" textLength="1020" lengthAdjust="spacing">BY SUJIMOTO · ISABELLA DE’ MEDICI · BY SUJIMOTO · ISABELLA DE’ MEDICI · </textPath></text></svg><div class="coin-ring"></div><div class="coin-emb"><div class="coin-logo"></div></div></div></div>
+ <div class="hsi tl"><div class="hsin tl"><img src="./assets/4937d0005660c6d80453e3bf82dc2bfc.png" alt="Sujimoto" style="display:block;width:64px;margin:0 0 22px"><span class="k kd">The developer</span><h2 class="mar" style="margin:14px 0 0;font-size:48px;line-height:1;color:#1A0E0E">The House of <span class="acc" style="color:#5C1A1A">Sujimoto</span>.</h2><p style="margin:18px 0 0;font:300 15px/1.6 Poppins;color:#3d2a22">Built through difficult times. Every address in the line was finished, handed over and lived in.</p></div></div>
+</div></div>
+<div class="ln"><div class="lstage"><div style="padding:0 24px"><span class="k kd">The Sujimoto line · since 2012</span><p style="margin:10px 0 0;font:300 15px/1.6 Poppins;color:#3d2a22">Every tower carries a Medici name. Isabella is the next in the line.</p></div><div class="ltrack tl"><div class="lc"><div class="lci"><img src="./assets/b6d16bbde484276628957d34c1d25ab3.jpg" alt="" style="object-position:55% 55%"></div><div class="lcm"><span class="dia"></span><span class="k kd" style="font-size:10px">Delivered</span></div><div class="mar" style="margin-top:6px;font-size:26px;color:#1A0E0E">Medici<span style="font-size:13px;color:#5a4034"> by Sujimoto</span></div><div style="margin-top:2px;font:300 12px/1.5 Poppins;color:#5a4034">Milverton Road, Ikoyi · 2015</div></div><div class="lc"><div class="lci"><img src="./assets/823c3f301b7ba72ffeb3b8c412797858.jpg" alt="" style="object-position:50% 50%"></div><div class="lcm"><span class="dia"></span><span class="k kd" style="font-size:10px">Delivered</span></div><div class="mar" style="margin-top:6px;font-size:26px;color:#1A0E0E">Giuliano<span style="font-size:13px;color:#5a4034"> by Sujimoto</span></div><div style="margin-top:2px;font:300 12px/1.5 Poppins;color:#5a4034">Banana Island, Ikoyi</div></div><div class="lc"><div class="lci"><img src="./assets/97d0d69552429eed50e9138e70be6caf.jpg" alt="" style="object-position:50% 35%"></div><div class="lcm"><span class="dia"></span><span class="k kd" style="font-size:10px">In development</span></div><div class="mar" style="margin-top:6px;font-size:26px;color:#1A0E0E">Leonardo<span style="font-size:13px;color:#5a4034"> by Sujimoto</span></div><div style="margin-top:2px;font:300 12px/1.5 Poppins;color:#5a4034">Banana Island · 36 storeys</div></div><div class="lc"><div class="lci"><img src="./assets/5716d33f6745b9a81c1d198aacc01da0.jpg" alt="" style="object-position:50% 40%"></div><div class="lcm"><span class="dia"></span><span class="k kd" style="font-size:10px">Completed 2026</span></div><div class="mar" style="margin-top:6px;font-size:26px;color:#1A0E0E">Lucrezia<span style="font-size:13px;color:#5a4034"> by Sujimoto</span></div><div style="margin-top:2px;font:300 12px/1.5 Poppins;color:#5a4034">Banana Island · 15 storeys</div></div><div class="lc"><div class="lci" style="overflow:visible;background:linear-gradient(180deg,#2A0F12,#1A0E0E)"><img src="./assets/6a565b0c71c7f7ca80b51a697765d431.png" alt="" class="lcis"></div><div class="lcm"><span class="dia"></span><span class="k kd" style="font-size:10px">Now, private pre-launch</span></div><div class="mar" style="margin-top:6px;font-size:26px;color:#1A0E0E">Isabella<span style="font-size:13px;color:#5a4034"> by Sujimoto</span></div><div style="margin-top:2px;font:300 12px/1.5 Poppins;color:#5a4034">Victoria Island · 55 storeys</div></div></div><div class="lbar"><i class="tl"></i></div></div></div>
+
+<section style="padding:72px 0;background:#1A0E0E"><article class="letter"><div style="text-align:center;font:400 11px/1 Marcellus,serif;letter-spacing:.3em;color:#6b3a1e">LAGOS · ANNO DOMINI MMXXVI</div><div style="text-align:center;margin-top:12px;font:400 32px/1 MC,serif;color:#5C1A1A">To the First Fifty</div>
+ <p style="margin:26px 0 0;font:400 16px/1.7 Marcellus,serif"><span style="float:left;font:400 52px/.85 MC,serif;color:#5C1A1A;margin:4px 8px 0 0">I</span>sabella de’ Medici was a Florentine noblewoman of the Renaissance, known for her wit, her music and her patronage of the arts. History came close to forgetting her.</p>
+ <p style="margin:14px 0 0;font:400 16px/1.7 Marcellus,serif">We gave this tower her name so that Lagos remembers her every day. Fifty-five storeys over Victoria Island, run as a hotel, and owned first by fifty people who chose to be early.</p>
+ <p style="margin:14px 0 0;font:400 17px/1.6 Marcellus,serif;color:#5C1A1A;font-style:italic">I am obsessed with proving that Africans can build the best luxury in the world. Isabella is not my next project. It is my masterpiece.</p>
+ <div style="margin-top:30px;display:flex;align-items:flex-end;justify-content:space-between"><div style="display:flex;align-items:center;gap:14px"><div style="width:72px;height:90px;border-radius:50%;border:2px solid #8a5a2b;background:url(./assets/6fd83ba3a59430dc75c476060262ef74.jpg) 50% 14%/260% auto no-repeat;filter:sepia(.35)"></div><div><img src="./assets/6ba9cb4a28e49311b2189462ac412f9d.png" alt="S. Ogundele" style="display:block;height:44px;width:auto;filter:brightness(0);opacity:.82"><span style="display:block;margin-top:8px;font:500 9px/1.4 Poppins;letter-spacing:.12em;text-transform:uppercase;color:#6b3a1e">Group Managing Director<br>Sujimoto Group</span></div></div><img src="./assets/945a0cc659159dd00ebca4ef851b4f81.png" alt="" style="width:60px;transform:rotate(-8deg)"></div>
+</article></section>
+
+<section style="position:relative;height:620px;background:#1A0E0E;margin:0 12px;border-radius:14px;overflow:hidden"><video src="./assets/d562f2e79dbbb900de549fac81d6b23d.mp4" poster="./assets/625a3f8e2c4bb16eb6bd108611b30647.jpg" autoplay="" muted="" loop="" playsinline="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(26,14,14,.92),rgba(26,14,14,0) 60%)"></div><div style="position:absolute;left:22px;right:22px;bottom:30px;display:flex;flex-direction:column;gap:16px"><span class="k">The site · Victoria Island</span><h2 class="mar" style="margin:0;font-size:36px;line-height:1.05;color:#FFFDF8">The ground is already <span class="acc">Moving</span>.</h2><span style="display:inline-flex;align-items:center;gap:14px;color:#FFFDF8;font:500 11px Poppins;letter-spacing:.16em;text-transform:uppercase"><span style="width:54px;height:54px;border-radius:50%;background:#C98A2B;display:flex;align-items:center;justify-content:center"><svg width="18" height="20" viewBox="0 0 18 20"><path d="M2 1l15 9-15 9z" fill="#1A0E0E"></path></svg></span>Watch the film · 0:45</span></div></section>
+
+<section class="sec" id="m-reserve" style="background:#140A0B;margin-top:72px"><span class="k">Reserve a unit</span><h2 class="h2">Choose your <span class="acc">residence</span>.</h2><p class="p" style="margin-top:14px;font-size:14px">Tap a residence on the floor, tell us who you are, and we will confirm on WhatsApp. Nothing is charged here.</p>
+ <div class="pins" style="margin:22px -12px 0;aspect-ratio:{{pv.ar}}"><img src="{{pv.src}}" alt="Isabella typical residential floor plate" style="position:absolute;inset:0;width:100%;height:100%"><sc-for list="{{pins}}" as="p" hint-placeholder-count="5"><button type="button" class="pin" onClick="{{p.pick}}" style="left:{{p.x}};top:{{p.y}};background:{{p.bg}};color:{{p.ink}}">{{p.no}}</button></sc-for></div>
+ <div style="margin-top:18px;padding:16px 18px;border:1px solid rgba(201,138,43,.4);border-radius:12px;display:flex;justify-content:space-between;align-items:center"><div><span style="display:inline-block;padding:5px 9px;border-radius:999px;background:{{sel.tbg}};color:{{sel.tink}};font:500 9px/1 Poppins;letter-spacing:.12em;text-transform:uppercase">{{sel.tag}}</span><div class="mar" style="font-size:22px;margin-top:8px">{{sel.no}} · {{sel.name}}</div><div style="font:300 12px Poppins;color:#cdbfa6;margin-top:4px">{{sel.size}} m² · from {{sel.price}}</div></div></div>
+ <div style="display:flex;flex-direction:column;gap:20px;margin-top:26px"><label class="fld">Full name<input placeholder="Your full name"></label><label class="fld">Phone or WhatsApp<input placeholder="+234"></label><label class="fld">Email<input placeholder="you@example.com"></label><label class="fld">When are you ready?<input placeholder="This quarter, next year…"></label><a class="btn g" href="#">Reserve my unit</a></div>
+ <p style="margin:18px 0 0;font:300 11px Poppins;color:#a8987e">Return and appreciation figures are investment targets, not guarantees.</p>
+</section>
+
+<section class="sec" id="m-faq"><span class="k">Before you ask</span><h2 class="h2">Common <span class="acc">Questions</span>.</h2>
+ <div class="pills"><sc-for list="{{fcats}}" as="c" hint-placeholder-count="5"><button type="button" onClick="{{c.pick}}" style="background:{{c.bg}};color:{{c.ink}}">{{c.label}}</button></sc-for></div>
+ <div style="margin-top:12px"><sc-for list="{{fqs}}" as="q" hint-placeholder-count="4"><div class="fq"><button type="button" onClick="{{q.pick}}">{{q.q}}<i style="transform:{{q.rot}}">+</i></button><div class="more {{q.cls}}"><div><p style="margin:0 0 18px;font:300 14px/1.6 Poppins;color:#cdbfa6">{{q.a}}</p></div></div></div></sc-for></div>
+ <a class="btn g" href="#m-reserve" style="margin-top:28px">Reserve a Unit</a>
+</section>
+<footer style="padding:48px 24px 56px;display:flex;justify-content:center;background:#140A0B;border-top:1px solid rgba(201,138,43,.25)"><img src="./assets/4937d0005660c6d80453e3bf82dc2bfc.png" alt="A product of Sujimoto" style="width:72px"></footer>
+</div>
+<sc-if value="{{amOpen}}" hint-placeholder-val="{{false}}"><div class="ov"><button type="button" class="ovx" onClick="{{closeAm}}" aria-label="Close amenities"><svg width="16" height="16" viewBox="0 0 24 24" stroke="#C98A2B" stroke-width="1.5"><path d="M5 5l14 14M19 5L5 19"></path></svg></button><section class="ovs"><img src="./assets/3db1a3e8aefe41bd20a2a5494bc6675f.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">I · Floor 7 · Hotel lobby</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">The lobby aquarium</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">Africa’s largest hotel-lobby aquarium, with up to 1,000 species of marine life. Arrival at Isabella starts underwater.</p></div><span class="ovn">01 / 08</span></section><section class="ovs"><img src="./assets/52d77b4da5917bf40f0b216c8fc0682b.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">II · Rooftop</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">The sky pool</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">An elevated pool above the Lagos skyline, with a sky bar and outdoor lounge beside it.</p></div><span class="ovn">02 / 08</span></section><section class="ovs"><img src="./assets/dc0d0aa874585783298b00d688d0ebc9.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">III · Wellness</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">Spa in the sky</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">Spa, beauty, recovery and performance, to the standard of the world’s great wellness destinations.</p></div><span class="ovn">03 / 08</span></section><section class="ovs"><img src="./assets/a18ac8a7bffe8496eb65730c73579b3a.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">IV · Dining</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">Restaurants and lounge</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">Three international restaurants and a lounge, open to residents and guests.</p></div><span class="ovn">04 / 08</span></section><section class="ovs"><img src="./assets/460e639807732fd51688e1befb23aba9.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">V · Shopping</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">The boutiques</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">Up to 28 global luxury shops, plus a luxury minimart for everyday.</p></div><span class="ovn">05 / 08</span></section><section class="ovs"><img src="./assets/bc62aaf3d0a76d7dfde4ab4c4ac232df.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">VI · Leisure</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">Casino and billiards</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">A private casino and billiards room for the evening.</p></div><span class="ovn">06 / 08</span></section><section class="ovs"><img src="./assets/add56f92451d615d77f488b27186e65a.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">VII · Leisure</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">The virtual golf bar</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">Play any course on earth: 2,500 courses, from the bar.</p></div><span class="ovn">07 / 08</span></section><section class="ovs"><img src="./assets/bd67fedf03d91c5869cb7a05c2e289bb.jpg" alt=""><div class="ovg"></div><div class="ovt"><span class="k">VIII · Family</span><h3 class="mar" style="margin:0;font-size:34px;line-height:1.05;color:#FFFDF8">The kids’ arcade</h3><p style="margin:0;font:300 14px/1.6 Poppins;color:#e6d8c0">A games arcade, play area and creche for the children.</p></div><span class="ovn">08 / 08</span></section><section style="position:relative;z-index:2;background:#1A0E0E;padding:64px 24px 80px"><span class="k">And also inside</span><h3 class="mar" style="margin:10px 0 18px;font-size:30px;color:#FFFDF8">Isabella</h3><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Sky bar and outdoor lounge</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>World-class gym</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Premium 48-seat cinema</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Medici art collection</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Water display entrance</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Salon and beauty</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Executive lounge</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Event centre and pre-function lounge</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Smart building and digital guest services</span></div><div class="al"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C98A2B" stroke-width="1.3"><path d="M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6z"></path></svg></i><span>Separate residential arrival and access</span></div><button type="button" class="btn g" onClick="{{closeAm}}" style="width:100%;margin-top:28px">Back to the page</button></section></div></sc-if>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const F = [{"c": "The project", "q": [{"q": "What is Isabella de’ Medici and where is it located?", "a": "Sujimoto’s planned 55-storey luxury hotel and serviced-apartment development in Victoria Island, Lagos, envisioned as Nigeria’s tallest luxury hotel, with a signature aquarium, three international restaurants, a sky pool, casino, wellness, retail and entertainment facilities."}, {"q": "Why Isabella?", "a": "You can own a hotel room for US$150,000, with an initial payment of US$50,000. The investment targets up to 25% annual rental returns and up to 300% capital appreciation upon completion, planned within three and a half years from commencement."}, {"q": "What can I buy?", "a": "The US$150,000 pioneer offer applies to a 48 m² studio. Larger categories are available on separate quotation: one bedroom (about 100 m²), two bedrooms (about 140 m²), three bedrooms (about 220 m²) and a four-bedroom penthouse (about 600 m²)."}, {"q": "What facilities are planned?", "a": "A sky pool on the 35th floor, three fine-dining restaurants, a luxury casino, spa, sauna and treatment rooms, a fully equipped gym, a 48-seat cinema, virtual golf, a children’s arcade, playground and crèche, up to 28 luxury shops, a grand lobby with a feature aquarium, an executive lounge and sky bar, event facilities, personalised concierge, controlled access and smart building systems."}, {"q": "What makes Isabella different?", "a": "It brings hotel room ownership, luxury dining, wellness, entertainment and retail together, with a quality of design and service conceived to set a new benchmark. Our ambition is to build Africa’s best hotel."}]}, {"c": "Price and payment", "q": [{"q": "How much does a hotel room cost?", "a": "The first 50 hotel rooms cost US$150,000 each at pre-launch. At groundbreaking the announced price will be US$210,000. Pioneer buyers receive their name on their room and 21 complimentary stay days a year, compared with the standard 14."}, {"q": "Is there a payment plan?", "a": "Yes. Pioneer partners pay US$50,000 now and spread the remaining US$100,000 over one year. The next payment begins at groundbreaking, not before."}]}, {"c": "Construction and delivery", "q": [{"q": "How are my payments protected?", "a": "Payments follow agreed construction milestones, including groundbreaking, piling and later stages. You pay as work progresses."}, {"q": "What is the current stage?", "a": "Isabella is at the design stage, which is why a limited group of pioneer partners is invited to come on board now."}, {"q": "When will Isabella be completed?", "a": "The planned construction period is three and a half years from commencement."}]}, {"c": "Rental income and owner use", "q": [{"q": "How can my room return up to 25% a year?", "a": "At US$200 a night and 70% occupancy, a room earns about US$51,100 a year. With 70% to the owner and 30% to the operator, the owner’s share is about US$35,770, roughly 23.8% of US$150,000. Projections are targets, not guarantees."}, {"q": "Who will operate the hotel?", "a": "A global hotel operator will run day-to-day operations, guest services and the rental programme. Discussions are underway with Marriott and other leading luxury operators."}, {"q": "Can I stay in my unit or rent it myself?", "a": "Owners receive 14 complimentary stay days a year; pioneer partners receive 21. Rooms cannot be rented independently: hotel management handles rentals through the rental programme."}, {"q": "What supports the appreciation target?", "a": "An early buyer at Lucrezia paid US$850,000 for a unit now valued at about US$4 million. A unit at Giuliano sold for ₦285 million and is now valued at about ₦3 billion."}]}, {"c": "Purchase and resale", "q": [{"q": "Can I resell my unit?", "a": "Yes, subject to the terms of your agreement with the developer."}, {"q": "How do I reserve a unit?", "a": "Share your full name and address. We prepare your offer letter, and you make your payment."}]}];
+const U = [['01','The Medici Classic','Hotel','Studio · 50 m²',150000,'50'],['02','The Isabella','Hotel','One bedroom · 100 m²',290000,'100'],['03','The Duchess','Hotel','Two bedrooms · 140 m²',790000,'140'],['04','The Florence','Hotel','Three bedrooms · 220 m²',1200000,'220'],['03','The Duchess Residence','Residence','Two bedrooms · 140 m²',790000,'140'],['05','The Crown of Medici','Residence','Four-bedroom penthouse · 600 m²',5000000,'600']];
+const IMG = ['fafe48b166e4a6c0ac81fc1ceb3d5428','fa52053219366bf4efde334674b48a3b','da8544351ad71af790c5542db3f9833b','7edc370b55b340b909cf336ea291d31a','0beeb8c36f80112bd2636d3efcfcf431','e8e8c7c7391d2b9277ea23d42485a668'];
+const fmt = (x) => x >= 1000000 ? 'US$' + (x/1000000) + 'M' : 'US$' + x.toLocaleString('en-US');
+const tab = st.tab || 0, ci = st.ci || 0;
+const on = {bg:'#C98A2B', ink:'#1A0E0E'}, off = {bg:'transparent', ink:'#C98A2B'};
+const idx = tab === 0 ? [0,1,2,3] : [4,5];
+const rlist = idx.map(k => ({ no:U[k][0], name:U[k][1], kind:U[k][2], sub:U[k][3], price:fmt(U[k][4]), img: '/_blob/' + IMG[k], tbg: tab === 0 ? '#5C1A1A' : '#C98A2B', tink: tab === 0 ? '#EDE3D0' : '#1A0E0E', pick: () => this.setState({ ci:k }) }));
+const PV = {src:'./assets/e17a3a668b9990c59d341daff1bc95f2.png', ar:'1500/661', p:[['49.8%','14.4%'],['20.5%','29.7%'],['88.1%','39.1%'],['23.8%','52.8%'],['84.4%','61.8%']]};
+const PM = [0,1,2,3,2,4], PU = [0,1,2,3,5];
+const pins = PU.map((u, pi) => { const o = PM[ci] === pi; return { no:U[u][0], x:PV.p[pi][0], y:PV.p[pi][1], bg: o ? '#EDE3D0' : '#1A0E0E', ink: o ? '#5C1A1A' : '#C98A2B', pick: () => this.setState({ ci:u }) }; });
+const hot = U[ci][2] === 'Hotel';
+const sel = { no:U[ci][0], name:U[ci][1], size:U[ci][5], price:fmt(U[ci][4]), tag: hot ? 'Hotel · managed for you' : 'Residence · private home', tbg: hot ? '#5C1A1A' : '#C98A2B', tink: hot ? '#EDE3D0' : '#1A0E0E' };
+const fc = st.fc || 0, fi = st.fi === undefined ? 0 : st.fi;
+const fcats = F.map((c, k) => ({ label:c.c, bg: k === fc ? '#C98A2B' : 'transparent', ink: k === fc ? '#1A0E0E' : '#C98A2B', pick: () => this.setState({ fc:k, fi:0 }) }));
+const fqs = F[fc].q.map((q, k) => ({ q:q.q, a:q.a, cls: k === fi ? 'on' : '', rot: k === fi ? 'rotate(45deg)' : 'none', pick: () => this.setState({ fi: k === fi ? -1 : k }) }));
+return { amOpen: !!st.am, openAm: () => this.setState({ am:true }), closeAm: () => this.setState({ am:false }),
+ storyCls: st.story ? 'on' : '', storyLbl: st.story ? 'Close her story −' : 'Read her story +', toggleStory: () => this.setState({ story: !st.story }),
+ tabH: () => this.setState({ tab:0 }), tabR: () => this.setState({ tab:1 }), tH: tab === 0 ? on : off, tR: tab === 1 ? on : off,
+ tabLine: tab === 0 ? 'Hotel suites: you own the suite, the hotel runs it, lets it and looks after it.' : 'Residences: two private homes, owned outright, with a separate residential arrival.',
+ rlist, pv:PV, pins, sel, fcats, fqs };
+}
+}
+</script></body></html>

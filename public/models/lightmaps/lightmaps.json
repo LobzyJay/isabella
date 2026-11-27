@@ -1,0 +1,23 @@
+{
+  "LM_slabs": {
+    "file": "lightmaps/LM_slabs.webp",
+    "size": 2048,
+    "lightMapIntensity": 5.5254,
+    "uv": "TEXCOORD_1",
+    "colorSpace": "srgb"
+  },
+  "LM_fascia": {
+    "file": "lightmaps/LM_fascia.webp",
+    "size": 2048,
+    "lightMapIntensity": 11.3757,
+    "uv": "TEXCOORD_1",
+    "colorSpace": "srgb"
+  },
+  "LM_plaza": {
+    "file": "lightmaps/LM_plaza.webp",
+    "size": 1024,
+    "lightMapIntensity": 2.9908,
+    "uv": "TEXCOORD_1",
+    "colorSpace": "srgb"
+  }
+}
